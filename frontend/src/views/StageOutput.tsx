@@ -1,0 +1,199 @@
+import React, { useState } from 'react';
+import { Copy, Check, RotateCcw, Table, FileText, ArrowLeft, GitCompare } from 'lucide-react';
+import { useDesign } from '../context/DesignContext';
+
+export const StageOutput: React.FC = () => {
+  const { 
+    requirements, 
+    scenarios, 
+    comparisonReport, 
+    mode, 
+    resetSession,
+    prevStage 
+  } = useDesign();
+
+  const [copied, setCopied] = useState(false);
+
+  // Generate markdown representation of scenarios
+  const getScenariosMarkdown = (): string => {
+    let md = '';
+    scenarios.forEach((sc) => {
+      md += `${sc.id}: ${sc.name} - ${sc.priority}\n`;
+      
+      md += 'Предусловия:\n';
+      if (sc.preconditions.length === 0) {
+        md += '* Нет\n';
+      } else {
+        sc.preconditions.forEach((p) => {
+          md += `* ${p}\n`;
+        });
+      }
+      
+      md += 'Шаги:\n';
+      sc.steps.forEach((step, index) => {
+        md += `${index + 1}. ${step}\n`;
+      });
+      
+      md += 'Ожидаемый результат:\n';
+      sc.expected_results.forEach((res, index) => {
+        md += `${index + 1}. ${res}\n`;
+      });
+      
+      md += 'Покрытие:\n';
+      sc.coverage.forEach((reqId) => {
+        md += `* ${reqId}\n`;
+      });
+      
+      md += '\n';
+    });
+    return md.trim();
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(getScenariosMarkdown());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="container animated-in">
+      <div style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>
+            Финальный этап: Результаты анализа
+          </h2>
+          <p style={{ color: 'var(--text-secondary)' }}>
+            Сгенерированная матрица трассируемости и проработанные тест-сценарии готовы к экспорту.
+          </p>
+        </div>
+        <button className="btn btn-secondary" onClick={resetSession}>
+          <RotateCcw size={16} />
+          Начать заново
+        </button>
+      </div>
+
+      {/* 1. Traceability Matrix Grid */}
+      <div className="glass-panel" style={{ padding: '24px', marginBottom: '40px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
+          <Table size={20} style={{ color: 'var(--primary)' }} />
+          <h3 style={{ fontSize: '1.2rem' }}>Матрица трассируемости (Traceability Matrix)</h3>
+        </div>
+
+        <div style={{ overflowX: 'auto' }}>
+          <table className="matrix-table" style={{ marginTop: 0 }}>
+            <thead>
+              <tr>
+                <th style={{ width: '100px' }}>№</th>
+                <th>Требование</th>
+                {scenarios.map((sc) => (
+                  <th key={sc.id} style={{ width: '90px', textAlign: 'center' }} title={sc.name}>
+                    {sc.id}
+                  </th>
+                ))}
+                <th style={{ width: '220px', textAlign: 'center' }}>Всего покрывающих кейсов</th>
+              </tr>
+            </thead>
+            <tbody>
+              {requirements.map((req) => {
+                let coverCount = 0;
+                return (
+                  <tr key={req.id}>
+                    <td style={{ fontWeight: 600, color: 'var(--primary)' }}>{req.id}</td>
+                    <td>{req.description}</td>
+                    {scenarios.map((sc) => {
+                      const isCovered = sc.coverage.includes(req.id);
+                      if (isCovered) coverCount++;
+                      return (
+                        <td key={sc.id} style={{ textAlign: 'center', fontWeight: 600 }}>
+                          {isCovered ? (
+                            <span style={{ color: 'var(--success)' }}>+</span>
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)' }}>-</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td style={{ textAlign: 'center' }}>
+                      <span className={`coverage-badge ${coverCount > 0 ? 'has-cover' : 'no-cover'}`}>
+                        {coverCount}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 2. Textual Test Scenarios (Formatted Markdown) */}
+      <div className="glass-panel" style={{ padding: '24px', marginBottom: '40px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <FileText size={20} style={{ color: 'var(--primary)' }} />
+            <h3 style={{ fontSize: '1.2rem' }}>Сгенерированные тест-сценарии</h3>
+          </div>
+          <button className="btn btn-secondary" onClick={handleCopy} style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
+            {copied ? (
+              <>
+                <Check size={16} style={{ color: 'var(--success)' }} />
+                Скопировано!
+              </>
+            ) : (
+              <>
+                <Copy size={16} />
+                Копировать Markdown
+              </>
+            )}
+          </button>
+        </div>
+
+        <pre 
+          style={{ 
+            background: 'rgba(0,0,0,0.25)', 
+            padding: '20px', 
+            borderRadius: 'var(--radius-sm)', 
+            border: '1px solid var(--border)',
+            color: 'var(--text-secondary)',
+            fontFamily: 'monospace, Courier New',
+            fontSize: '0.9rem',
+            overflowX: 'auto',
+            whiteSpace: 'pre-wrap',
+            maxHeight: '400px'
+          }}
+        >
+          {getScenariosMarkdown()}
+        </pre>
+      </div>
+
+      {/* 3. Diff Summary (Only in Existing Design mode) */}
+      {mode === 'existing' && comparisonReport && (
+        <div className="glass-panel" style={{ padding: '24px', marginBottom: '40px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+            <GitCompare size={20} style={{ color: 'var(--accent)' }} />
+            <h3 style={{ fontSize: '1.2rem' }}>Сводка по изменениям из Этапа 5</h3>
+          </div>
+          <div 
+            style={{ 
+              lineHeight: 1.6, 
+              color: 'var(--text-secondary)', 
+              whiteSpace: 'pre-wrap',
+              fontSize: '0.95rem'
+            }}
+          >
+            {comparisonReport}
+          </div>
+        </div>
+      )}
+
+      {/* Navigation */}
+      <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+        <button className="btn btn-secondary" onClick={prevStage}>
+          <ArrowLeft size={16} />
+          Назад к редактированию
+        </button>
+      </div>
+
+    </div>
+  );
+};
