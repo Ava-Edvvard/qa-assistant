@@ -27,3 +27,8 @@ out/
 *.njsproj
 *.sln
 *.swp
+
+# Markdown documentation
+*.md
+docs/
+
