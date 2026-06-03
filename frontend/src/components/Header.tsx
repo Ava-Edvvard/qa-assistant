@@ -26,7 +26,7 @@ export const Header: React.FC = () => {
               QA-Assistant
             </h1>
             <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.02em', marginTop: '2px' }}>
-              Test Design AI Studio
+              Test Design
             </p>
           </div>
         </div>

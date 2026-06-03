@@ -36,7 +36,7 @@ export const Stage1Requirements: React.FC = () => {
   }
 
   return (
-    <div className="container animated-in" style={{ maxWidth: '750px' }}>
+    <div className="container animated-in">
       <div style={{ marginBottom: '16px' }}>
         <h2 style={{ fontSize: '1.4rem', marginBottom: '4px', fontWeight: 700 }}>
           Этап 1: Ввод требований и файлов
