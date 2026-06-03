@@ -64,8 +64,12 @@ class LLMService:
             
         prompt = f"""
         Analyze the following user requirements and optional additional info.
-        Extract a list of distinct, atomic requirements. 
-        Format them as a JSON list where each item has "id" (starts with RQ-01, RQ-02...) and "description" (in Russian).
+        
+        CRITICAL RULES:
+        1. Extract a list of distinct, atomic requirements.
+        2. If a requirement has a title/header line (e.g. "1. Поддержка масок и валидации полей") and a detailed description line immediately following it (e.g. "Форма должна на лету..."), you MUST combine them into a single requirement description. Do NOT split them into separate requirements.
+        3. Format of combined requirement: "[Title]: [Description]" (e.g., "1. Поддержка масок и валидации полей: Форма должна на лету...").
+        4. Format the final output as a JSON list where each item has "id" (starts with RQ-01, RQ-02...) and "description" (in Russian).
         
         Raw Requirements Text:
         {text}
@@ -73,8 +77,9 @@ class LLMService:
         Additional Info:
         {additional_info or "None"}
         
-        Return ONLY valid JSON array. No markdown formatting.
+        Return ONLY a valid JSON array. No markdown formatting.
         """
+
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -239,18 +244,40 @@ class LLMService:
     # --- MOCK FALLBACKS ---
 
     def _mock_parse_requirements(self, text: str, additional_info: Optional[str] = None) -> List[Requirement]:
-        lines = [line.strip() for line in text.split("\n") if line.strip() and not line.strip().startswith("#")]
-        if not lines:
-            lines = ["Тестовое требование открытие главной страницы", "Тестовое требование открытие формы авторизации"]
+        import re
+        raw_lines = [line.strip() for line in text.split("\n") if line.strip() and not line.strip().startswith("#")]
+        
+        merged_lines = []
+        current_req = ""
+        
+        for line in raw_lines:
+            # Matches strings starting with numbers and dot/parenthesis, e.g., "1.", "1)"
+            if re.match(r'^\d+[\.\)]', line):
+                if current_req:
+                    merged_lines.append(current_req)
+                current_req = line
+            else:
+                if current_req:
+                    # Append details to current requirement title
+                    current_req += ": " + line
+                else:
+                    current_req = line
+        
+        if current_req:
+            merged_lines.append(current_req)
+            
+        if not merged_lines:
+            merged_lines = ["Тестовое требование открытие главной страницы", "Тестовое требование открытие формы авторизации"]
             
         reqs = []
-        for i, line in enumerate(lines[:10]):
+        for i, line in enumerate(merged_lines[:15]):
             reqs.append(Requirement(
                 id=f"RQ-0{i+1}" if i < 9 else f"RQ-{i+1}",
-                description=line[:120],
+                description=line,
                 cases_count=0
             ))
         return reqs
+
 
     def _mock_generate_questions(self, requirements: List[Requirement]) -> List[ClarifyingQuestion]:
         questions = []
