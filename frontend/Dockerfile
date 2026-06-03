@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Копируем package.json и устанавливаем зависимости
 COPY package.json ./
-RUN npm install
+RUN yarn install --network-timeout 600000
 
 # Копируем исходный код фронтенда
 COPY . .
