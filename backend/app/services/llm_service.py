@@ -37,19 +37,37 @@ class RateLimiter:
 
 class LLMService:
     def __init__(self):
-        self.api_key = settings.OPENAI_API_KEY
-        self.model = settings.OPENAI_MODEL
-        
-        # Initialize OpenAI client if valid key is provided
-        if self.api_key and self.api_key != "mock-key-replace-with-your-real-key":
-            self.client = OpenAI(api_key=self.api_key)
-            self.is_mock = False
-        else:
-            self.client = None
-            self.is_mock = True
-            logger.warning("Using Mock LLM responses. Configure OPENAI_API_KEY in .env to use real OpenAI API.")
-            
+        self.provider = settings.LLM_PROVIDER.lower()
         self.rate_limiter = RateLimiter(max_calls=3, period=60.0)
+        
+        self.is_mock = True
+        self.client = None
+        self.model = ""
+        
+        if self.provider == "gemini":
+            gemini_key = settings.GEMINI_API_KEY
+            if gemini_key and gemini_key != "mock-key-replace-with-your-real-key" and gemini_key.strip():
+                self.client = OpenAI(
+                    api_key=gemini_key,
+                    base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+                )
+                self.model = settings.GEMINI_MODEL
+                self.is_mock = False
+                logger.info(f"Initialized Gemini LLM using OpenAI compatibility layer with model: {self.model}")
+        
+        else: # Default or explicitly 'openai'
+            openai_key = settings.OPENAI_API_KEY
+            if openai_key and openai_key != "mock-key-replace-with-your-real-key" and openai_key.strip():
+                self.client = OpenAI(api_key=openai_key)
+                self.model = settings.OPENAI_MODEL
+                self.is_mock = False
+                logger.info(f"Initialized OpenAI LLM with model: {self.model}")
+                
+        if self.is_mock:
+            logger.warning(
+                f"Using Mock LLM responses (Provider: {self.provider}). "
+                "Configure valid GEMINI_API_KEY or OPENAI_API_KEY in .env to enable real LLM integration."
+            )
 
 
     def parse_requirements(self, text: str, additional_info: Optional[str] = None) -> List[Requirement]:
