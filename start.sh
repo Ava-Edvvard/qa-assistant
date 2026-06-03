@@ -8,11 +8,14 @@ echo "      QA-Assistant — Автоматический запуск"
 echo "==================================================="
 echo ""
 
-# 1. Проверка Python3
-if ! command -v python3 &> /dev/null; then
-    echo "[ERROR] Python 3 не установлен!"
-    echo "Пожалуйста, установите Python 3.10+ с помощью вашего пакетного менеджера"
-    echo "или скачайте с официального сайта: https://www.python.org/downloads/"
+# 1. Проверка Python
+if command -v python &> /dev/null && python --version &> /dev/null; then
+    PYTHON_CMD="python"
+elif command -v python3 &> /dev/null && python3 --version &> /dev/null; then
+    PYTHON_CMD="python3"
+else
+    echo "[ERROR] Python не установлен или не добавлен в PATH!"
+    echo "Пожалуйста, установите Python 3.10+ с официального сайта: https://www.python.org/downloads/"
     echo ""
     exit 1
 fi
@@ -36,8 +39,8 @@ if [ ! -d "backend/venv" ]; then
         echo "[INFO] Обнаружен глобальный uv. Создание venv через uv..."
         uv venv backend/venv
     else
-        echo "[INFO] Создание стандартного venv (python3 -m venv)..."
-        python3 -m venv backend/venv
+        echo "[INFO] Создание стандартного venv ($PYTHON_CMD -m venv)..."
+        $PYTHON_CMD -m venv backend/venv
     fi
     if [ $? -ne 0 ]; then
         echo "[ERROR] Не удалось создать виртуальное окружение Python!"
@@ -45,20 +48,27 @@ if [ ! -d "backend/venv" ]; then
     fi
 fi
 
+# Определяем папку с бинарниками виртуального окружения (Scripts на Windows, bin на Linux/macOS)
+if [ -d "backend/venv/Scripts" ]; then
+    VENV_BIN="Scripts"
+else
+    VENV_BIN="bin"
+fi
+
 # 4. Установка зависимостей бэкенда
 echo "[INFO] Шаг 2: Установка зависимостей бэкенда..."
-source backend/venv/bin/activate
+source backend/venv/$VENV_BIN/activate
 
 if command -v uv &>/dev/null; then
     echo "[INFO] Установка зависимостей через uv pip (быстрый режим)..."
     uv pip install -r backend/requirements.txt
 else
     echo "[INFO] Попытка локальной установки uv для ускорения..."
-    python3 -m pip install --upgrade pip &> /dev/null
+    $PYTHON_CMD -m pip install --upgrade pip &> /dev/null
     pip install uv &> /dev/null
-    if [ $? -eq 0 ] && [ -f "backend/venv/bin/uv" ]; then
+    if [ $? -eq 0 ] && command -v uv &>/dev/null; then
         echo "[INFO] Локальный uv установлен. Установка зависимостей через uv..."
-        backend/venv/bin/uv pip install -r backend/requirements.txt
+        uv pip install -r backend/requirements.txt
     else
         echo "[INFO] Установка зависимостей через стандартный pip..."
         pip install -r backend/requirements.txt
@@ -118,7 +128,7 @@ trap cleanup SIGINT SIGTERM
 # Запуск бэкенда
 echo "[INFO] Запуск FastAPI (порт 8000) в фоновом режиме..."
 cd backend
-source venv/bin/activate
+source venv/$VENV_BIN/activate
 uvicorn app.main:app --port 8000 --host 127.0.0.1 --reload &
 BACKEND_PID=$!
 cd ..
