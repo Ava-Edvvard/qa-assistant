@@ -30,5 +30,6 @@ out/
 
 # Markdown documentation
 *.md
+!README.md
 docs/
 
