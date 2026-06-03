@@ -6,53 +6,52 @@ export const Stage5Comparison: React.FC = () => {
   const { comparisonReport, nextStage, prevStage } = useDesign();
 
   return (
-    <div className="container animated-in" style={{ maxWidth: '800px' }}>
-      <div style={{ marginBottom: '30px' }}>
-        <h2 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>
+    <div className="container animated-in" style={{ maxWidth: '750px' }}>
+      <div style={{ marginBottom: '16px' }}>
+        <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '2px' }}>
           Этап 5: Сводка изменений (Diff Report)
         </h2>
-        <p style={{ color: 'var(--text-secondary)' }}>
-          ИИ проанализировал старые тест-кейсы и сопоставил их с новыми. Ниже представлена сводка изменений:
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+          Сравнение старых тест-кейсов с новыми тест-сценариями.
         </p>
       </div>
 
       {/* Report Container */}
-      <div className="glass-panel" style={{ padding: '30px', marginBottom: '30px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
-          <GitCompare size={20} style={{ color: 'var(--accent)' }} />
-          <h3 style={{ fontSize: '1.15rem' }}>Отчет сравнения версий</h3>
+      <div className="glass-panel" style={{ padding: '20px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', borderBottom: '1px solid var(--border)', paddingBottom: '8px' }}>
+          <GitCompare size={16} style={{ color: 'var(--primary)' }} />
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)' }}>Сводный отчет изменений</h3>
         </div>
         
         {comparisonReport ? (
           <div 
             style={{ 
-              lineHeight: 1.6, 
-              color: 'var(--text-primary)', 
+              lineHeight: 1.5, 
+              color: 'var(--text-secondary)', 
               whiteSpace: 'pre-wrap', 
-              fontSize: '1rem',
+              fontSize: '0.85rem',
               fontFamily: 'var(--font-body)'
             }}
           >
-            {/* Custom basic styling for markdown layout */}
             {comparisonReport}
           </div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-muted)', padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius-sm)' }}>
-            <AlertCircle size={20} />
-            <span>Не удалось сгенерировать сводный отчет. Пожалуйста, продолжите для просмотра финальных результатов.</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', padding: '12px', background: '#f8fafc', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>
+            <AlertCircle size={16} />
+            <span>Сводный отчет пуст или не сгенерирован. Вы можете продолжить к результатам.</span>
           </div>
         )}
       </div>
 
       {/* Navigation */}
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button className="btn btn-secondary" onClick={prevStage}>
-          <ArrowLeft size={16} />
+        <button className="btn btn-secondary" onClick={prevStage} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
+          <ArrowLeft size={14} />
           Назад к сценариям
         </button>
-        <button className="btn btn-primary" onClick={nextStage}>
+        <button className="btn btn-primary" onClick={nextStage} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
           Далее к результатам
-          <ArrowRight size={16} />
+          <ArrowRight size={14} />
         </button>
       </div>
 

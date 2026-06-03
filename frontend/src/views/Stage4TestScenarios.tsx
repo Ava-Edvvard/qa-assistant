@@ -130,31 +130,31 @@ export const Stage4TestScenarios: React.FC = () => {
 
   return (
     <div className="container animated-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div>
-          <h2 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '2px' }}>
             Этап 4: Генерация и редактирование тест-сценариев
           </h2>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            ИИ сгенерировал следующие тест-кейсы. Вы можете дополнить, изменить или удалить сценарии.
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+            Редактируйте или удаляйте сгенерированные сценарии перед выводом результатов.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={handleOpenAdd}>
-          <Plus size={18} />
+        <button className="btn btn-primary" onClick={handleOpenAdd} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
+          <Plus size={14} />
           Создать тест-сценарий
         </button>
       </div>
 
       {error && (
-        <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--danger)', borderRadius: 'var(--radius-sm)', color: 'var(--danger)', marginBottom: '24px' }}>
+        <div style={{ padding: '10px 14px', background: '#fce8e6', border: '1px solid var(--danger)', borderRadius: 'var(--radius-sm)', color: 'var(--danger)', marginBottom: '16px', fontSize: '0.85rem' }}>
           {error}
         </div>
       )}
 
       {/* Scenarios Accordion List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '40px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
         {scenarios.length === 0 ? (
-          <div className="glass-panel" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
+          <div className="glass-panel" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
             Нет созданных тест-сценариев. Нажмите кнопку сверху, чтобы добавить вручную.
           </div>
         ) : (
@@ -167,14 +167,14 @@ export const Stage4TestScenarios: React.FC = () => {
                 className="glass-panel" 
                 style={{ 
                   overflow: 'hidden', 
-                  borderLeft: `4px solid ${sc.priority === 'П1' ? 'var(--danger)' : sc.priority === 'П2' ? 'var(--warning)' : 'var(--primary)'}` 
+                  borderLeft: `3px solid ${sc.priority === 'П1' ? 'var(--danger)' : sc.priority === 'П2' ? 'var(--warning)' : 'var(--primary)'}` 
                 }}
               >
                 {/* Accordion Header */}
                 <div 
                   onClick={() => toggleExpand(sc.id)}
                   style={{ 
-                    padding: '20px 24px', 
+                    padding: '10px 16px', 
                     display: 'flex', 
                     justifyContent: 'space-between', 
                     alignItems: 'center', 
@@ -182,25 +182,26 @@ export const Stage4TestScenarios: React.FC = () => {
                     userSelect: 'none'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                    <span style={{ fontWeight: 700, color: 'var(--primary)', minWidth: '70px' }}>{sc.id}</span>
-                    <span style={{ fontWeight: 600, fontSize: '1.05rem' }}>{sc.name}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                    <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '0.85rem', minWidth: '50px' }}>{sc.id}</span>
+                    <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{sc.name}</span>
                     
                     <span className={`badge badge-${sc.priority.toLowerCase()}`}>
-                      {sc.priority === 'П1' ? 'Критичный' : sc.priority === 'П2' ? 'Важный' : 'Низкий'}
+                      {sc.priority}
                     </span>
                     
                     {sc.coverage.length > 0 && (
-                      <div style={{ display: 'flex', gap: '4px', marginLeft: '10px' }}>
+                      <div style={{ display: 'flex', gap: '3px', marginLeft: '6px' }}>
                         {sc.coverage.map(cId => (
                           <span 
                             key={cId}
                             style={{ 
-                              fontSize: '0.7rem', 
-                              background: 'rgba(255,255,255,0.06)', 
-                              padding: '2px 6px', 
-                              borderRadius: '4px',
-                              border: '1px solid var(--border)' 
+                              fontSize: '0.65rem', 
+                              background: '#f1f5f9', 
+                              padding: '1px 4px', 
+                              borderRadius: '3px',
+                              border: '1px solid var(--border)',
+                              color: 'var(--text-secondary)'
                             }}
                           >
                             {cId}
@@ -210,14 +211,14 @@ export const Stage4TestScenarios: React.FC = () => {
                     )}
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <button 
                       className="btn-icon" 
                       onClick={(e) => handleOpenEdit(sc, e)}
                       title="Редактировать"
                       style={{ border: 'none', background: 'none', cursor: 'pointer' }}
                     >
-                      <Edit2 size={16} />
+                      <Edit2 size={13} />
                     </button>
                     <button 
                       className="btn-icon" 
@@ -225,52 +226,52 @@ export const Stage4TestScenarios: React.FC = () => {
                       title="Удалить"
                       style={{ border: 'none', background: 'none', cursor: 'pointer' }}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={13} />
                     </button>
-                    {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    {isExpanded ? <ChevronUp size={16} style={{ color: 'var(--text-muted)' }} /> : <ChevronDown size={16} style={{ color: 'var(--text-muted)' }} />}
                   </div>
                 </div>
 
                 {/* Accordion Content */}
                 {isExpanded && (
-                  <div style={{ padding: '0 24px 24px 24px', borderTop: '1px solid var(--border)', background: 'rgba(0,0,0,0.1)' }}>
+                  <div style={{ padding: '10px 16px 14px 16px', borderTop: '1px solid var(--border)', background: '#fafafa' }}>
                     
                     {/* Preconditions */}
-                    <div style={{ marginTop: '20px' }}>
-                      <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                    <div style={{ marginTop: '8px' }}>
+                      <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 700 }}>
                         Предусловия
                       </h4>
                       {sc.preconditions.length === 0 ? (
-                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Нет предусловий</p>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Нет предусловий</p>
                       ) : (
-                        <ul style={{ paddingLeft: '20px', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+                        <ul style={{ paddingLeft: '14px', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                           {sc.preconditions.map((p, idx) => (
-                            <li key={idx} style={{ marginBottom: '4px' }}>{p}</li>
+                            <li key={idx} style={{ marginBottom: '2px' }}>{p}</li>
                           ))}
                         </ul>
                       )}
                     </div>
 
                     {/* Steps & Expected Results grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '10px' }}>
                       <div>
-                        <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                        <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 700 }}>
                           Шаги
                         </h4>
-                        <ol style={{ paddingLeft: '20px', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+                        <ol style={{ paddingLeft: '14px', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                           {sc.steps.map((step, idx) => (
-                            <li key={idx} style={{ marginBottom: '6px' }}>{step}</li>
+                            <li key={idx} style={{ marginBottom: '4px' }}>{step}</li>
                           ))}
                         </ol>
                       </div>
                       
                       <div>
-                        <h4 style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                        <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 700 }}>
                           Ожидаемый результат
                         </h4>
-                        <ol style={{ paddingLeft: '20px', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+                        <ol style={{ paddingLeft: '14px', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                           {sc.expected_results.map((res, idx) => (
-                            <li key={idx} style={{ marginBottom: '6px' }}>{res}</li>
+                            <li key={idx} style={{ marginBottom: '4px' }}>{res}</li>
                           ))}
                         </ol>
                       </div>
@@ -286,27 +287,27 @@ export const Stage4TestScenarios: React.FC = () => {
 
       {/* Navigation */}
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button className="btn btn-secondary" onClick={prevStage}>
-          <ArrowLeft size={16} />
+        <button className="btn btn-secondary" onClick={prevStage} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
+          <ArrowLeft size={14} />
           Назад к вопросам
         </button>
-        <button className="btn btn-primary" onClick={handleNextTransition}>
+        <button className="btn btn-primary" onClick={handleNextTransition} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
           Далее
-          <ArrowRight size={16} />
+          <ArrowRight size={14} />
         </button>
       </div>
 
       {/* Create / Edit Modal */}
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: '750px', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h3 style={{ marginBottom: '24px', fontSize: '1.4rem' }}>
+          <div className="modal-content" style={{ maxWidth: '650px', maxHeight: '85vh', overflowY: 'auto' }}>
+            <h3 style={{ marginBottom: '14px', fontSize: '1.1rem', fontWeight: 700 }}>
               {editingScenario ? `Редактировать сценарий ${editingScenario.id}` : 'Создать новый тест-сценарий'}
             </h3>
             
-            <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Название сценария *</label>
                   <input
@@ -315,6 +316,7 @@ export const Stage4TestScenarios: React.FC = () => {
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="Например: Открытие формы авторизации"
+                    style={{ fontSize: '0.85rem', padding: '6px 10px' }}
                     required
                   />
                 </div>
@@ -325,9 +327,10 @@ export const Stage4TestScenarios: React.FC = () => {
                     className="form-select"
                     value={formPriority}
                     onChange={(e) => setFormPriority(e.target.value)}
+                    style={{ fontSize: '0.85rem', padding: '6px 10px' }}
                   >
-                    <option value="П1">П1 - Критический</option>
-                    <option value="П2">П2 - Важный</option>
+                    <option value="П1">П1 - Высокий</option>
+                    <option value="П2">П2 - Средний</option>
                     <option value="П3">П3 - Низкий</option>
                   </select>
                 </div>
@@ -339,20 +342,20 @@ export const Stage4TestScenarios: React.FC = () => {
                   className="form-textarea"
                   value={formPreconditions}
                   onChange={(e) => setFormPreconditions(e.target.value)}
-                  placeholder="Пример:&#13;Пользователь находится на главной странице&#13;База данных доступна"
-                  style={{ minHeight: '80px' }}
+                  placeholder="Пользователь находится на главной странице"
+                  style={{ minHeight: '50px', fontSize: '0.85rem', padding: '6px 10px' }}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">Шаги (каждый шаг с новой строки) *</label>
+                  <label className="form-label">Шаги (каждый с новой строки) *</label>
                   <textarea
                     className="form-textarea"
                     value={formSteps}
                     onChange={(e) => setFormSteps(e.target.value)}
-                    placeholder="Пример:&#13;Открыть браузер&#13;Перейти на форму авторизации"
-                    style={{ minHeight: '120px' }}
+                    placeholder="Открыть браузер"
+                    style={{ minHeight: '80px', fontSize: '0.85rem', padding: '6px 10px' }}
                     required
                   />
                 </div>
@@ -363,8 +366,8 @@ export const Stage4TestScenarios: React.FC = () => {
                     className="form-textarea"
                     value={formExpectedResults}
                     onChange={(e) => setFormExpectedResults(e.target.value)}
-                    placeholder="Пример:&#13;Браузер успешно запущен&#13;Форма авторизации отобразилась корректно"
-                    style={{ minHeight: '120px' }}
+                    placeholder="Браузер успешно запущен"
+                    style={{ minHeight: '80px', fontSize: '0.85rem', padding: '6px 10px' }}
                     required
                   />
                 </div>
@@ -372,18 +375,18 @@ export const Stage4TestScenarios: React.FC = () => {
 
               {/* Requirement Coverage Checkboxes */}
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Покрытие требований матрицы трассируемости</label>
+                <label className="form-label">Покрытие требований</label>
                 <div 
                   style={{ 
-                    maxHeight: '120px', 
+                    maxHeight: '100px', 
                     overflowY: 'auto', 
                     border: '1px solid var(--border)', 
-                    padding: '12px', 
+                    padding: '8px', 
                     borderRadius: 'var(--radius-sm)', 
                     display: 'grid', 
                     gridTemplateColumns: '1fr 1fr', 
-                    gap: '10px',
-                    background: 'rgba(0,0,0,0.15)'
+                    gap: '6px',
+                    background: '#f8fafc'
                   }}
                 >
                   {requirements.map((req) => (
@@ -392,8 +395,8 @@ export const Stage4TestScenarios: React.FC = () => {
                       style={{ 
                         display: 'flex', 
                         alignItems: 'center', 
-                        gap: '8px', 
-                        fontSize: '0.85rem', 
+                        gap: '6px', 
+                        fontSize: '0.8rem', 
                         cursor: 'pointer',
                         color: formCoverage.includes(req.id) ? 'var(--text-primary)' : 'var(--text-muted)'
                       }}
@@ -404,17 +407,17 @@ export const Stage4TestScenarios: React.FC = () => {
                         onChange={() => handleCheckboxChange(req.id)}
                         style={{ cursor: 'pointer' }}
                       />
-                      <span><strong>{req.id}</strong>: {req.description.slice(0, 30)}...</span>
+                      <span><strong>{req.id}</strong>: {req.description.slice(0, 20)}...</span>
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
                   Отмена
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
                   {editingScenario ? 'Сохранить' : 'Создать'}
                 </button>
               </div>

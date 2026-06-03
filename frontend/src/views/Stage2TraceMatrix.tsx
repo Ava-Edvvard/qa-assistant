@@ -56,72 +56,70 @@ export const Stage2TraceMatrix: React.FC = () => {
 
   return (
     <div className="container animated-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div>
-          <h2 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '2px' }}>
             Этап 2: Проработка матрицы требований
           </h2>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            ИИ выделил следующие требования. Вы можете редактировать их, удалять или добавлять новые вручную.
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+            Выделите и отредактируйте требования перед запуском тест-анализа.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={handleOpenAdd}>
-          <Plus size={18} />
+        <button className="btn btn-primary" onClick={handleOpenAdd} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
+          <Plus size={14} />
           Добавить требование
         </button>
       </div>
 
       {error && (
-        <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--danger)', borderRadius: 'var(--radius-sm)', color: 'var(--danger)', marginBottom: '24px' }}>
+        <div style={{ padding: '10px 14px', background: '#fce8e6', border: '1px solid var(--danger)', borderRadius: 'var(--radius-sm)', color: 'var(--danger)', marginBottom: '16px', fontSize: '0.85rem' }}>
           {error}
         </div>
       )}
 
       {/* Requirements Table */}
-      <div className="glass-panel" style={{ padding: '10px', overflowX: 'auto', marginBottom: '30px' }}>
+      <div className="glass-panel" style={{ overflowX: 'auto', marginBottom: '20px' }}>
         <table className="matrix-table">
           <thead>
             <tr>
-              <th style={{ width: '100px' }}>№</th>
+              <th style={{ width: '80px' }}>№</th>
               <th>Требование</th>
-              <th style={{ width: '220px' }}>Всего покрывающих кейсов</th>
-              <th style={{ width: '120px', textAlign: 'right' }}>Действия</th>
+              <th style={{ width: '180px' }}>Всего покрывающих кейсов</th>
+              <th style={{ width: '100px', textAlign: 'right' }}>Действия</th>
             </tr>
           </thead>
           <tbody>
             {requirements.length === 0 ? (
               <tr>
-                <td colSpan={4} style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+                <td colSpan={4} style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                   Список требований пуст. Добавьте требования с помощью кнопки сверху.
                 </td>
               </tr>
             ) : (
               requirements.map((req) => (
                 <tr key={req.id}>
-                  <td style={{ fontWeight: 600, color: 'var(--primary)' }}>{req.id}</td>
-                  <td>{req.description}</td>
+                  <td style={{ fontWeight: 700, color: 'var(--primary)' }}>{req.id}</td>
+                  <td style={{ color: 'var(--text-primary)' }}>{req.description}</td>
                   <td>
                     <span className="coverage-badge no-cover">0</span>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '4px' }}>
                       <button 
                         className="btn-icon" 
                         onClick={() => handleOpenEdit(req)}
                         title="Редактировать"
                         style={{ border: 'none', background: 'none', cursor: 'pointer' }}
                       >
-                        <Edit2 size={16} />
+                        <Edit2 size={14} />
                       </button>
                       <button 
                         className="btn-icon" 
                         onClick={() => deleteRequirement(req.id)}
                         title="Удалить"
                         style={{ border: 'none', background: 'none', cursor: 'pointer' }}
-                        onMouseOver={(e) => e.currentTarget.style.color = 'var(--danger)'}
-                        onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>
@@ -133,18 +131,19 @@ export const Stage2TraceMatrix: React.FC = () => {
       </div>
 
       {/* Navigation Buttons */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-        <button className="btn btn-secondary" onClick={prevStage}>
-          <ArrowLeft size={16} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+        <button className="btn btn-secondary" onClick={prevStage} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
+          <ArrowLeft size={14} />
           Назад
         </button>
         <button 
           className="btn btn-primary" 
           onClick={fetchQuestions}
           disabled={requirements.length === 0}
+          style={{ padding: '6px 12px', fontSize: '0.8rem' }}
         >
           Далее
-          <ArrowRight size={16} />
+          <ArrowRight size={14} />
         </button>
       </div>
 
@@ -152,7 +151,7 @@ export const Stage2TraceMatrix: React.FC = () => {
       {isAddOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3 style={{ marginBottom: '20px', fontSize: '1.4rem' }}>Добавить новое требование</h3>
+            <h3 style={{ marginBottom: '14px', fontSize: '1.1rem', fontWeight: 700 }}>Добавить новое требование</h3>
             <form onSubmit={handleAdd}>
               <div className="form-group">
                 <label className="form-label">Описание требования</label>
@@ -161,15 +160,16 @@ export const Stage2TraceMatrix: React.FC = () => {
                   value={addText}
                   onChange={(e) => setAddText(e.target.value)}
                   placeholder="Пример: Система должна поддерживать авторизацию с помощью СМС кода..."
+                  style={{ minHeight: '80px', fontSize: '0.85rem' }}
                   required
                   autoFocus
                 />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsAddOpen(false)}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '14px' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsAddOpen(false)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
                   Отмена
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={!addText.trim()}>
+                <button type="submit" className="btn btn-primary" disabled={!addText.trim()} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
                   Добавить
                 </button>
               </div>
@@ -182,7 +182,7 @@ export const Stage2TraceMatrix: React.FC = () => {
       {isEditOpen && selectedReq && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3 style={{ marginBottom: '20px', fontSize: '1.4rem' }}>
+            <h3 style={{ marginBottom: '14px', fontSize: '1.1rem', fontWeight: 700 }}>
               Редактировать требование {selectedReq.id}
             </h3>
             <form onSubmit={handleEdit}>
@@ -192,15 +192,16 @@ export const Stage2TraceMatrix: React.FC = () => {
                   className="form-textarea"
                   value={editText}
                   onChange={(e) => setEditText(e.target.value)}
+                  style={{ minHeight: '80px', fontSize: '0.85rem' }}
                   required
                   autoFocus
                 />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
-                <button type="button" className="btn btn-secondary" onClick={() => setIsEditOpen(false)}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '14px' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsEditOpen(false)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
                   Отмена
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={!editText.trim()}>
+                <button type="submit" className="btn btn-primary" disabled={!editText.trim()} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
                   Сохранить
                 </button>
               </div>
