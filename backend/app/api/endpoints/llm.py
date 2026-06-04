@@ -1,12 +1,34 @@
 from fastapi import APIRouter, HTTPException
+from openai import OpenAI
 from app.models.schemas import (
     QuestionsGenerationRequest, QuestionsResponse,
     ScenariosGenerationRequest, ScenariosResponse,
-    CompareRequest, CompareResponse
+    CompareRequest, CompareResponse,
+    ModelsRequest, ModelsResponse
 )
 from app.services.llm_service import llm_service
 
 router = APIRouter()
+
+@router.post("/models", response_model=ModelsResponse)
+async def list_models(payload: ModelsRequest):
+    """
+    Queries the dynamic LLM provider for available models.
+    """
+    try:
+        if payload.provider == "gemini":
+            base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+        elif payload.provider == "openai":
+            base_url = None
+        else: # custom
+            base_url = payload.base_url
+            
+        client = OpenAI(api_key=payload.api_key, base_url=base_url)
+        response = client.models.list()
+        model_ids = [m.id for m in response.data]
+        return ModelsResponse(models=model_ids)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Ошибка получения списка моделей: {str(e)}")
 
 @router.post("/generate-questions", response_model=QuestionsResponse)
 async def generate_questions(payload: QuestionsGenerationRequest):
@@ -14,7 +36,7 @@ async def generate_questions(payload: QuestionsGenerationRequest):
     Stage 3: Takes requirements list and generates a list of clarifying questions using LLM.
     """
     try:
-        questions = llm_service.generate_questions(payload.requirements)
+        questions = llm_service.generate_questions(payload.requirements, payload.llm_config)
         return QuestionsResponse(questions=questions)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate questions: {str(e)}")
@@ -25,7 +47,7 @@ async def generate_scenarios(payload: ScenariosGenerationRequest):
     Stage 4: Takes requirements list and answers, then generates structured test scenarios.
     """
     try:
-        scenarios = llm_service.generate_scenarios(payload.requirements, payload.answers)
+        scenarios = llm_service.generate_scenarios(payload.requirements, payload.answers, payload.llm_config)
         return ScenariosResponse(scenarios=scenarios)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate test scenarios: {str(e)}")
@@ -36,7 +58,7 @@ async def compare_scenarios(payload: CompareRequest):
     Stage 5 (Existing Design): Compares user's original/old test scenarios with the new ones.
     """
     try:
-        summary = llm_service.compare_scenarios(payload.old_scenarios_text, payload.new_scenarios)
+        summary = llm_service.compare_scenarios(payload.old_scenarios_text, payload.new_scenarios, payload.llm_config)
         
         # Calculate mock ids for added/removed/modified for metadata (UI display helper)
         # In a real app, this can be parsed from LLM JSON response or calculated.

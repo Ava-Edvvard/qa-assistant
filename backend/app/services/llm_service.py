@@ -5,7 +5,7 @@ import threading
 from typing import List, Optional
 from openai import OpenAI
 from app.core.config import settings
-from app.models.schemas import Requirement, ClarifyingQuestion, TestScenario, UserAnswer
+from app.models.schemas import Requirement, ClarifyingQuestion, TestScenario, UserAnswer, LLMConfig
 
 logger = logging.getLogger("app.services.llm_service")
 
@@ -69,12 +69,48 @@ class LLMService:
                 "Configure valid GEMINI_API_KEY or OPENAI_API_KEY in .env to enable real LLM integration."
             )
 
+    def _get_client_and_model(self, llm_config: Optional[LLMConfig] = None):
+        """
+        Dynamically returns (client, model, is_mock) based on config,
+        or falls back to env-configured defaults.
+        """
+        if llm_config and llm_config.api_key and llm_config.api_key.strip():
+            api_key = llm_config.api_key.strip()
+            provider = llm_config.provider.lower()
+            
+            if api_key == "mock-key-replace-with-your-real-key":
+                return None, "", True
 
-    def parse_requirements(self, text: str, additional_info: Optional[str] = None) -> List[Requirement]:
+            try:
+                if provider == "gemini":
+                    client = OpenAI(
+                        api_key=api_key,
+                        base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+                    )
+                    model = llm_config.model or "gemini-2.5-flash"
+                    return client, model, False
+                elif provider == "openai":
+                    client = OpenAI(api_key=api_key)
+                    model = llm_config.model or "gpt-4o-mini"
+                    return client, model, False
+                elif provider == "custom":
+                    client = OpenAI(
+                        api_key=api_key,
+                        base_url=llm_config.base_url or "http://127.0.0.1:8000/v1"
+                    )
+                    model = llm_config.model or ""
+                    return client, model, False
+            except Exception as e:
+                logger.error(f"Error creating dynamic LLM client: {e}. Falling back to default.")
+                
+        return self.client, self.model, self.is_mock
+
+    def parse_requirements(self, text: str, additional_info: Optional[str] = None, llm_config: Optional[LLMConfig] = None) -> List[Requirement]:
         """
         Parses raw requirement text into a list of structured requirements (RQ-01, RQ-02...).
         """
-        if self.is_mock:
+        client, model, is_mock = self._get_client_and_model(llm_config)
+        if is_mock:
             return self._mock_parse_requirements(text, additional_info)
             
         self.rate_limiter.wait_if_needed()
@@ -99,8 +135,8 @@ class LLMService:
         """
 
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
+            response = client.chat.completions.create(
+                model=model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.2
             )
@@ -117,11 +153,12 @@ class LLMService:
             logger.error(f"Error calling OpenAI parse_requirements: {e}. Falling back to mock.")
             return self._mock_parse_requirements(text, additional_info)
 
-    def generate_questions(self, requirements: List[Requirement]) -> List[ClarifyingQuestion]:
+    def generate_questions(self, requirements: List[Requirement], llm_config: Optional[LLMConfig] = None) -> List[ClarifyingQuestion]:
         """
         Generates clarifying questions for requirements if ambiguities are found.
         """
-        if self.is_mock:
+        client, model, is_mock = self._get_client_and_model(llm_config)
+        if is_mock:
             return self._mock_generate_questions(requirements)
 
         self.rate_limiter.wait_if_needed()
@@ -139,8 +176,8 @@ class LLMService:
         Return ONLY valid JSON array. No markdown formatting.
         """
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
+            response = client.chat.completions.create(
+                model=model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3
             )
@@ -156,11 +193,12 @@ class LLMService:
             logger.error(f"Error calling OpenAI generate_questions: {e}. Falling back to mock.")
             return self._mock_generate_questions(requirements)
 
-    def generate_scenarios(self, requirements: List[Requirement], answers: List[UserAnswer]) -> List[TestScenario]:
+    def generate_scenarios(self, requirements: List[Requirement], answers: List[UserAnswer], llm_config: Optional[LLMConfig] = None) -> List[TestScenario]:
         """
         Generates structured test scenarios based on requirements and clarifying answers.
         """
-        if self.is_mock:
+        client, model, is_mock = self._get_client_and_model(llm_config)
+        if is_mock:
             return self._mock_generate_scenarios(requirements, answers)
 
         self.rate_limiter.wait_if_needed()
@@ -190,8 +228,8 @@ class LLMService:
         Return ONLY a JSON list containing these objects. No markdown formatting.
         """
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
+            response = client.chat.completions.create(
+                model=model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.2
             )
@@ -217,11 +255,12 @@ class LLMService:
             logger.error(f"Error calling OpenAI generate_scenarios: {e}. Falling back to mock.")
             return self._mock_generate_scenarios(requirements, answers)
 
-    def compare_scenarios(self, old_text: str, new_cases: List[TestScenario]) -> str:
+    def compare_scenarios(self, old_text: str, new_cases: List[TestScenario], llm_config: Optional[LLMConfig] = None) -> str:
         """
         Compares old test cases text with newly generated test cases and returns summary of changes.
         """
-        if self.is_mock:
+        client, model, is_mock = self._get_client_and_model(llm_config)
+        if is_mock:
             return self._mock_compare_scenarios(old_text, new_cases)
 
         self.rate_limiter.wait_if_needed()
@@ -249,8 +288,8 @@ class LLMService:
         Return your response in markdown format.
         """
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
+            response = client.chat.completions.create(
+                model=model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.2
             )

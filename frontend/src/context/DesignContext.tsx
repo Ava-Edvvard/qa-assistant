@@ -46,6 +46,17 @@ interface DesignContextType {
   loading: boolean;
   error: string | null;
   
+  // LLM Config
+  llmProvider: string;
+  llmApiKey: string;
+  llmBaseUrl: string;
+  llmModel: string;
+  setLlmProvider: (val: string) => void;
+  setLlmApiKey: (val: string) => void;
+  setLlmBaseUrl: (val: string) => void;
+  setLlmModel: (val: string) => void;
+  fetchModels: (provider: string, apiKey: string, baseUrl?: string) => Promise<string[]>;
+
   // Actions
   startNewDesign: () => void;
   startExistingDesign: () => void;
@@ -97,6 +108,48 @@ export const DesignProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // LLM Config state
+  const [llmProvider, setLlmProviderState] = useState<string>(() => localStorage.getItem('llm_provider') || 'openai');
+  const [llmApiKey, setLlmApiKeyState] = useState<string>(() => localStorage.getItem('llm_api_key') || '');
+  const [llmBaseUrl, setLlmBaseUrlState] = useState<string>(() => localStorage.getItem('llm_base_url') || '');
+  const [llmModel, setLlmModelState] = useState<string>(() => localStorage.getItem('llm_model') || '');
+
+  const setLlmProvider = (val: string) => {
+    setLlmProviderState(val);
+    localStorage.setItem('llm_provider', val);
+  };
+  const setLlmApiKey = (val: string) => {
+    setLlmApiKeyState(val);
+    localStorage.setItem('llm_api_key', val);
+  };
+  const setLlmBaseUrl = (val: string) => {
+    setLlmBaseUrlState(val);
+    localStorage.setItem('llm_base_url', val);
+  };
+  const setLlmModel = (val: string) => {
+    setLlmModelState(val);
+    localStorage.setItem('llm_model', val);
+  };
+
+  const fetchModels = async (provider: string, apiKey: string, baseUrl?: string): Promise<string[]> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.post(`${API_BASE}/llm/models`, {
+        provider,
+        api_key: apiKey,
+        base_url: baseUrl || null
+      });
+      return response.data.models;
+    } catch (err: any) {
+      const errMsg = err.response?.data?.detail || 'Ошибка загрузки списка моделей';
+      setError(errMsg);
+      throw new Error(errMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const startNewDesign = () => {
     resetSession();
@@ -165,6 +218,13 @@ export const DesignProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       });
     }
 
+    if (llmApiKey && llmApiKey.trim()) {
+      formData.append('llm_provider', llmProvider);
+      formData.append('llm_api_key', llmApiKey.trim());
+      if (llmBaseUrl) formData.append('llm_base_url', llmBaseUrl.trim());
+      if (llmModel) formData.append('llm_model', llmModel.trim());
+    }
+
     try {
       const response = await axios.post(`${API_BASE}/design/parse-requirements`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -211,6 +271,12 @@ export const DesignProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     try {
       const response = await axios.post(`${API_BASE}/llm/generate-questions`, {
         requirements,
+        llm_config: llmApiKey && llmApiKey.trim() ? {
+          provider: llmProvider,
+          api_key: llmApiKey.trim(),
+          base_url: llmBaseUrl ? llmBaseUrl.trim() : null,
+          model: llmModel ? llmModel.trim() : null
+        } : null
       });
       setQuestions(response.data.questions);
       setAnswers([]);
@@ -256,6 +322,12 @@ export const DesignProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const response = await axios.post(`${API_BASE}/llm/generate-scenarios`, {
         requirements,
         answers,
+        llm_config: llmApiKey && llmApiKey.trim() ? {
+          provider: llmProvider,
+          api_key: llmApiKey.trim(),
+          base_url: llmBaseUrl ? llmBaseUrl.trim() : null,
+          model: llmModel ? llmModel.trim() : null
+        } : null
       });
       
       const generatedScenarios = response.data.scenarios;
@@ -312,6 +384,12 @@ export const DesignProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const response = await axios.post(`${API_BASE}/llm/compare-scenarios`, {
         old_scenarios_text: oldScenariosText,
         new_scenarios: scenarios,
+        llm_config: llmApiKey && llmApiKey.trim() ? {
+          provider: llmProvider,
+          api_key: llmApiKey.trim(),
+          base_url: llmBaseUrl ? llmBaseUrl.trim() : null,
+          model: llmModel ? llmModel.trim() : null
+        } : null
       });
       setComparisonReport(response.data.changes_summary);
       nextStage();
@@ -337,6 +415,16 @@ export const DesignProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         rawRequirementsText,
         loading,
         error,
+
+        llmProvider,
+        llmApiKey,
+        llmBaseUrl,
+        llmModel,
+        setLlmProvider,
+        setLlmApiKey,
+        setLlmBaseUrl,
+        setLlmModel,
+        fetchModels,
         
         startNewDesign,
         startExistingDesign,

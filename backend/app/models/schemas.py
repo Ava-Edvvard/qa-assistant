@@ -25,6 +25,20 @@ class TestScenario(BaseModel):
     expected_results: List[str] = Field(default_factory=list, description="Numbered expected results list")
     coverage: List[str] = Field(default_factory=list, description="List of covered requirement IDs (e.g. RQ-01)")
 
+class LLMConfig(BaseModel):
+    provider: str = Field(..., description="LLM provider: 'openai', 'gemini', 'custom'")
+    api_key: Optional[str] = Field(None, description="API Key for the provider")
+    base_url: Optional[str] = Field(None, description="Base URL (only for 'custom' provider)")
+    model: Optional[str] = Field(None, description="Model name selected by user")
+
+class ModelsRequest(BaseModel):
+    provider: str = Field(..., description="LLM provider: 'openai', 'gemini', 'custom'")
+    api_key: str = Field(..., description="API Key for the provider")
+    base_url: Optional[str] = Field(None, description="Base URL (only for 'custom' provider)")
+
+class ModelsResponse(BaseModel):
+    models: List[str] = Field(..., description="List of available models")
+
 class AnalysisRequest(BaseModel):
     requirements_text: str
     additional_info: Optional[str] = None
@@ -35,6 +49,7 @@ class RequirementsResponse(BaseModel):
 
 class QuestionsGenerationRequest(BaseModel):
     requirements: List[Requirement]
+    llm_config: Optional[LLMConfig] = None
 
 class QuestionsResponse(BaseModel):
     questions: List[ClarifyingQuestion]
@@ -42,6 +57,7 @@ class QuestionsResponse(BaseModel):
 class ScenariosGenerationRequest(BaseModel):
     requirements: List[Requirement]
     answers: List[UserAnswer]
+    llm_config: Optional[LLMConfig] = None
 
 class ScenariosResponse(BaseModel):
     scenarios: List[TestScenario]
@@ -49,6 +65,7 @@ class ScenariosResponse(BaseModel):
 class CompareRequest(BaseModel):
     old_scenarios_text: str
     new_scenarios: List[TestScenario]
+    llm_config: Optional[LLMConfig] = None
 
 class CompareResponse(BaseModel):
     changes_summary: str = Field(..., description="Detailed textual diff/report of changes")

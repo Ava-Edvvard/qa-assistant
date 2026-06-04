@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from typing import List, Optional
-from app.models.schemas import RequirementsResponse, Requirement
+from app.models.schemas import RequirementsResponse, Requirement, LLMConfig
 from app.services.parser import parser_service
 from app.services.llm_service import llm_service
 
@@ -10,7 +10,11 @@ router = APIRouter()
 async def parse_requirements(
     requirements_text: str = Form(...),
     additional_info: Optional[str] = Form(None),
-    files: Optional[List[UploadFile]] = File(None)
+    files: Optional[List[UploadFile]] = File(None),
+    llm_provider: Optional[str] = Form(None),
+    llm_api_key: Optional[str] = Form(None),
+    llm_base_url: Optional[str] = Form(None),
+    llm_model: Optional[str] = Form(None)
 ):
     """
     Stage 1: Receives raw requirements text, additional info, and files (Excel or images).
@@ -40,7 +44,15 @@ async def parse_requirements(
 
     # Call LLM Service to structure the requirements
     try:
-        requirements = llm_service.parse_requirements(combined_text, additional_info)
+        llm_config = None
+        if llm_api_key and llm_api_key.strip():
+            llm_config = LLMConfig(
+                provider=llm_provider or "openai",
+                api_key=llm_api_key,
+                base_url=llm_base_url,
+                model=llm_model
+            )
+        requirements = llm_service.parse_requirements(combined_text, additional_info, llm_config)
         return RequirementsResponse(requirements=requirements)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to parse requirements: {str(e)}")
