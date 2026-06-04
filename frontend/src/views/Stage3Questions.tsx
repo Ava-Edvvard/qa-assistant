@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HelpCircle, ChevronRight, CornerDownLeft, Sparkles, ArrowLeft, Edit2, RotateCcw } from 'lucide-react';
+import { HelpCircle, ChevronRight, CornerDownLeft, Sparkles, ArrowLeft, Edit2, RotateCcw, MinusCircle } from 'lucide-react';
 import { useDesign } from '../context/DesignContext';
 import { Loader } from '../components/Loader';
 
@@ -33,6 +33,13 @@ export const Stage3Questions: React.FC = () => {
   const handleSkip = () => {
     if (currentQuestion) {
       skipQuestion(currentQuestion.id);
+      setActiveAnswer('');
+    }
+  };
+
+  const handleNotConsidered = () => {
+    if (currentQuestion) {
+      submitAnswer(currentQuestion.id, 'Не рассматривается в рамках требования');
       setActiveAnswer('');
     }
   };
@@ -105,17 +112,27 @@ export const Stage3Questions: React.FC = () => {
                 type="button" 
                 className="btn btn-secondary" 
                 onClick={handleSkip}
-                style={{ flex: 1, padding: '6px 12px', fontSize: '0.8rem' }}
+                style={{ flex: 1, padding: '6px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
               >
                 Пропустить
                 <ChevronRight size={14} />
+              </button>
+
+              <button 
+                type="button" 
+                className="btn btn-secondary" 
+                onClick={handleNotConsidered}
+                style={{ flex: 1, padding: '6px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+              >
+                Не рассматривается
+                <MinusCircle size={14} />
               </button>
               
               <button 
                 type="submit" 
                 className="btn btn-primary"
                 disabled={!activeAnswer.trim()}
-                style={{ flex: 1, padding: '6px 12px', fontSize: '0.8rem' }}
+                style={{ flex: 1, padding: '6px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
               >
                 Ответить
                 <CornerDownLeft size={14} />
