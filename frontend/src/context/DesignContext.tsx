@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
 // Definitions matching Pydantic schemas
@@ -45,6 +45,7 @@ interface DesignContextType {
   rawRequirementsText: string;
   loading: boolean;
   error: string | null;
+  activeLlmName: string;
   
   // LLM Config
   llmProvider: string;
@@ -108,6 +109,38 @@ export const DesignProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  interface ServerLlmInfo {
+    provider: string;
+    model: string;
+    is_mock: boolean;
+  }
+  const [serverLlmInfo, setServerLlmInfo] = useState<ServerLlmInfo | null>(null);
+
+  useEffect(() => {
+    axios.get(`${API_BASE}/llm/info`)
+      .then(res => {
+        setServerLlmInfo(res.data);
+      })
+      .catch(err => {
+        console.error('Error fetching server LLM info:', err);
+      });
+  }, []);
+
+  const getActiveLlmName = () => {
+    if (llmApiKey && llmApiKey.trim()) {
+      const providerName = llmProvider === 'openai' ? 'OpenAI' : (llmProvider === 'gemini' ? 'Gemini' : 'Custom');
+      const modelName = llmModel || 'default';
+      return `${providerName} (${modelName})`;
+    } else if (serverLlmInfo) {
+      if (serverLlmInfo.is_mock) {
+        return 'Mock (Локальная заглушка)';
+      }
+      const providerName = serverLlmInfo.provider === 'openai' ? 'OpenAI' : (serverLlmInfo.provider === 'gemini' ? 'Gemini' : 'Custom');
+      return `${providerName} (${serverLlmInfo.model})`;
+    }
+    return 'Загрузка...';
+  };
 
   // LLM Config state
   const [llmProvider, setLlmProviderState] = useState<string>(() => localStorage.getItem('llm_provider') || 'openai');
@@ -415,6 +448,7 @@ export const DesignProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         rawRequirementsText,
         loading,
         error,
+        activeLlmName: getActiveLlmName(),
 
         llmProvider,
         llmApiKey,

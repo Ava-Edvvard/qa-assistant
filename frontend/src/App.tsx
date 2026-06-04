@@ -11,7 +11,7 @@ import { Stage5Comparison } from './views/Stage5Comparison';
 import { StageOutput } from './views/StageOutput';
 
 const MainLayout: React.FC = () => {
-  const { mode, currentStage } = useDesign();
+  const { mode, currentStage, activeLlmName } = useDesign();
 
   // Define steps titles based on mode
   const newDesignStages = [
@@ -63,6 +63,41 @@ const MainLayout: React.FC = () => {
         ) : (
           <div className="container animated-in">
             <StepProgress stages={activeStages} currentStage={currentStage} />
+            
+            <div 
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                marginBottom: '20px',
+                marginTop: '-10px'
+              }}
+            >
+              <span 
+                style={{
+                  fontSize: '0.75rem',
+                  color: 'var(--text-muted)',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '16px',
+                  padding: '4px 12px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span 
+                  style={{ 
+                    width: '6px', 
+                    height: '6px', 
+                    borderRadius: '50%', 
+                    backgroundColor: activeLlmName.includes('Mock') ? 'var(--warning)' : 'var(--success)',
+                    display: 'inline-block' 
+                  }}
+                ></span>
+                Модель: <strong>{activeLlmName}</strong>
+              </span>
+            </div>
+
             {renderStageView()}
           </div>
         )}

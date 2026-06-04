@@ -10,6 +10,17 @@ from app.services.llm_service import llm_service
 
 router = APIRouter()
 
+@router.get("/info")
+async def get_llm_info():
+    """
+    Returns default LLM configuration of the server.
+    """
+    return {
+        "provider": llm_service.provider,
+        "model": llm_service.model,
+        "is_mock": llm_service.is_mock
+    }
+
 @router.post("/models", response_model=ModelsResponse)
 async def list_models(payload: ModelsRequest):
     """
