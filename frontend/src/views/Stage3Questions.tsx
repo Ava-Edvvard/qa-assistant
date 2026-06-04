@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HelpCircle, ChevronRight, CornerDownLeft, Sparkles, ArrowLeft } from 'lucide-react';
+import { HelpCircle, ChevronRight, CornerDownLeft, Sparkles, ArrowLeft, Edit2, RotateCcw } from 'lucide-react';
 import { useDesign } from '../context/DesignContext';
 import { Loader } from '../components/Loader';
 
@@ -9,12 +9,16 @@ export const Stage3Questions: React.FC = () => {
     answers, 
     submitAnswer, 
     skipQuestion, 
+    updateAnswer,
+    resetAnswer,
     generateTestScenarios, 
     prevStage,
     loading 
   } = useDesign();
 
   const [activeAnswer, setActiveAnswer] = useState('');
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
 
   const currentQuestion = questions.length > 0 ? questions[0] : null;
 
@@ -38,7 +42,7 @@ export const Stage3Questions: React.FC = () => {
   }
 
   return (
-    <div className="container animated-in" style={{ maxWidth: '650px' }}>
+    <div className="container animated-in" style={{ maxWidth: '800px' }}>
       <div style={{ marginBottom: '16px' }}>
         <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '2px' }}>
           Этап 3: Уточняющие вопросы к требованиям
@@ -75,7 +79,7 @@ export const Stage3Questions: React.FC = () => {
             </div>
             <div>
               <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                Вопросов в очереди: {questions.length}
+                Вопрос {answers.length + 1} из {questions.length + answers.length}
               </span>
               <h3 style={{ fontSize: '1.05rem', marginTop: '2px', lineHeight: 1.35, fontWeight: 650, color: 'var(--text-primary)' }}>
                 {currentQuestion.question}
@@ -121,51 +125,118 @@ export const Stage3Questions: React.FC = () => {
         </div>
       ) : (
         /* Queue Empty: Review Answers and Proceed */
-        <div className="glass-panel" style={{ padding: '30px 20px', textAlign: 'center', marginBottom: '20px' }}>
-          <div 
-            style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '50%',
-              background: '#e6f4ea',
-              color: 'var(--success)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '14px'
-            }}
-          >
-            <Sparkles size={22} />
-          </div>
-          <h3 style={{ fontSize: '1.2rem', marginBottom: '6px', fontWeight: 700 }}>
-            Все вопросы проработаны!
+        <div className="glass-panel" style={{ padding: '24px', textAlign: 'left', marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>
+            Сводка по ответам на вопросы:
           </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '16px', maxWidth: '440px', margin: '0 auto 16px auto' }}>
-            Вы ответили на все уточняющие вопросы. Теперь ИИ готов провести полный тест-анализ и сгенерировать тест-сценарии.
-          </p>
           
-          {answers.length > 0 && (
-            <div style={{ textAlign: 'left', background: '#f8fafc', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', marginBottom: '20px', maxHeight: '150px', overflowY: 'auto' }}>
-              <h4 style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '4px' }}>
-                Ваши ответы:
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {answers.map((ans, idx) => (
-                  <div key={idx} style={{ fontSize: '0.8rem' }}>
-                    <div style={{ fontWeight: 650, color: 'var(--primary)' }}>Q: {ans.question}</div>
-                    <div style={{ color: 'var(--text-secondary)', marginTop: '2px', paddingLeft: '8px', borderLeft: '2px solid var(--border)' }}>
-                      A: {ans.answer}
+          {answers.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+              {answers.map((ans, idx) => {
+                const isEditing = editingQuestionId === ans.question_id;
+                return (
+                  <div 
+                    key={ans.question_id} 
+                    style={{ 
+                      padding: '16px', 
+                      background: '#f8fafc', 
+                      borderRadius: 'var(--radius-sm)', 
+                      border: '1px solid var(--border)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px'
+                    }}
+                  >
+                    <div style={{ fontSize: '0.85rem', fontWeight: 650, color: 'var(--primary)', lineHeight: 1.35 }}>
+                      Вопрос {idx + 1}: {ans.question}
                     </div>
+                    
+                    {isEditing ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <textarea
+                          className="form-textarea"
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          style={{ minHeight: '60px', fontSize: '0.85rem' }}
+                          required
+                          autoFocus
+                        />
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                          <button
+                            className="btn btn-secondary"
+                            onClick={() => setEditingQuestionId(null)}
+                            style={{ padding: '4px 10px', fontSize: '0.75rem', height: '30px' }}
+                          >
+                            Отмена
+                          </button>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => {
+                              if (editText.trim()) {
+                                updateAnswer(ans.question_id, editText.trim());
+                                setEditingQuestionId(null);
+                              }
+                            }}
+                            style={{ padding: '4px 10px', fontSize: '0.75rem', height: '30px' }}
+                          >
+                            Сохранить
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div 
+                          style={{ 
+                            fontSize: '0.85rem', 
+                            color: 'var(--text-secondary)', 
+                            paddingLeft: '10px', 
+                            borderLeft: '3px solid var(--border)',
+                            lineHeight: 1.4
+                          }}
+                        >
+                          {ans.answer}
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
+                          <button 
+                            className="btn btn-secondary"
+                            onClick={() => {
+                              setEditingQuestionId(ans.question_id);
+                              setEditText(ans.answer);
+                            }}
+                            style={{ padding: '4px 10px', fontSize: '0.75rem', height: '28px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                          >
+                            <Edit2 size={12} />
+                            Изменить ответ
+                          </button>
+                          
+                          <button 
+                            className="btn btn-secondary"
+                            onClick={() => resetAnswer(ans.question_id)}
+                            style={{ padding: '4px 10px', fontSize: '0.75rem', height: '28px', display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--danger)' }}
+                          >
+                            <RotateCcw size={12} />
+                            Вернуть к вопросу
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
+          ) : (
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>
+              Нет ответов на вопросы.
+            </p>
           )}
 
-          <button className="btn btn-primary" onClick={generateTestScenarios} style={{ padding: '10px 20px', fontSize: '0.85rem' }}>
-            Начать тест-анализ
-            <Sparkles size={14} />
-          </button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+            <button className="btn btn-primary" onClick={generateTestScenarios} style={{ padding: '10px 20px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              Начать тест-анализ
+              <Sparkles size={14} />
+            </button>
+          </div>
         </div>
       )}
 

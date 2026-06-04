@@ -79,6 +79,8 @@ interface DesignContextType {
   fetchQuestions: () => Promise<void>;
   submitAnswer: (questionId: string, answer: string) => void;
   skipQuestion: (questionId: string) => void;
+  updateAnswer: (questionId: string, answer: string) => void;
+  resetAnswer: (questionId: string) => void;
   
   // Stage 4 Actions
   generateTestScenarios: () => Promise<void>;
@@ -100,6 +102,7 @@ export const DesignProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [currentStage, setCurrentStage] = useState<number>(1);
   const [requirements, setRequirementsState] = useState<Requirement[]>([]);
   const [questions, setQuestions] = useState<ClarifyingQuestion[]>([]);
+  const [allQuestions, setAllQuestions] = useState<ClarifyingQuestion[]>([]);
   const [answers, setAnswers] = useState<UserAnswer[]>([]);
   const [scenarios, setScenariosState] = useState<TestScenario[]>([]);
   const [comparisonReport, setComparisonReport] = useState<string>('');
@@ -312,6 +315,7 @@ export const DesignProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         } : null
       });
       setQuestions(response.data.questions);
+      setAllQuestions(response.data.questions);
       setAnswers([]);
       nextStage();
     } catch (err: any) {
@@ -344,6 +348,18 @@ export const DesignProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       updatedQueue.splice(qIndex, 1);
       updatedQueue.push(q);
       setQuestions(updatedQueue);
+    }
+  };
+
+  const updateAnswer = (questionId: string, answerText: string) => {
+    setAnswers(answers.map((a) => (a.question_id === questionId ? { ...a, answer: answerText } : a)));
+  };
+
+  const resetAnswer = (questionId: string) => {
+    setAnswers(answers.filter((a) => a.question_id !== questionId));
+    const originalQ = allQuestions.find((q) => q.id === questionId);
+    if (originalQ && !questions.some((q) => q.id === questionId)) {
+      setQuestions([originalQ, ...questions]);
     }
   };
 
@@ -476,6 +492,8 @@ export const DesignProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         fetchQuestions,
         submitAnswer,
         skipQuestion,
+        updateAnswer,
+        resetAnswer,
         
         generateTestScenarios,
         setScenarios,
