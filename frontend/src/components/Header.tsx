@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldAlert, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useDesign } from '../context/DesignContext';
 
 export const Header: React.FC = () => {
@@ -12,14 +12,15 @@ export const Header: React.FC = () => {
           <div 
             style={{
               background: 'var(--primary)',
-              padding: '6px',
               borderRadius: 'var(--radius-sm)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              width: '30px',
+              height: '30px',
             }}
           >
-            <ShieldAlert size={18} color="white" />
+            <span style={{ color: 'white', fontWeight: 800, fontSize: '0.8rem', lineHeight: 1, fontFamily: 'var(--font-display)' }}>TD</span>
           </div>
           <div>
             <h1 style={{ fontSize: '1.1rem', fontFamily: 'var(--font-display)', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1 }}>
