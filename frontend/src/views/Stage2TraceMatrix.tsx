@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Plus, Edit2, Trash2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useDesign, Requirement } from '../context/DesignContext';
 import { Loader } from '../components/Loader';
@@ -148,7 +149,7 @@ export const Stage2TraceMatrix: React.FC = () => {
       </div>
 
       {/* Add Requirement Modal */}
-      {isAddOpen && (
+      {isAddOpen && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <h3 style={{ marginBottom: '14px', fontSize: '1.1rem', fontWeight: 700 }}>Добавить новое требование</h3>
@@ -175,11 +176,12 @@ export const Stage2TraceMatrix: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Edit Requirement Modal */}
-      {isEditOpen && selectedReq && (
+      {isEditOpen && selectedReq && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <h3 style={{ marginBottom: '14px', fontSize: '1.1rem', fontWeight: 700 }}>
@@ -207,7 +209,8 @@ export const Stage2TraceMatrix: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Plus, Edit2, Trash2, ChevronDown, ChevronUp, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useDesign, TestScenario } from '../context/DesignContext';
 import { Loader } from '../components/Loader';
@@ -313,9 +314,9 @@ export const Stage4TestScenarios: React.FC = () => {
       </div>
 
       {/* Create / Edit Modal */}
-      {isModalOpen && (
+      {isModalOpen && createPortal(
         <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: '650px', maxHeight: '85vh', overflowY: 'auto' }}>
+          <div className="modal-content" style={{ maxWidth: '850px', maxHeight: '85vh', overflowY: 'auto' }}>
             <h3 style={{ marginBottom: '14px', fontSize: '1.1rem', fontWeight: 700 }}>
               {editingScenario ? `Редактировать сценарий ${editingScenario.id}` : 'Создать новый тест-сценарий'}
             </h3>
@@ -350,7 +351,7 @@ export const Stage4TestScenarios: React.FC = () => {
                   </select>
                 </div>
               </div>
-
+ 
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Предусловия (каждое с новой строки)</label>
                 <textarea
@@ -361,7 +362,7 @@ export const Stage4TestScenarios: React.FC = () => {
                   style={{ minHeight: '50px', fontSize: '0.85rem', padding: '6px 10px' }}
                 />
               </div>
-
+ 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Шаги (каждый с новой строки) *</label>
@@ -374,7 +375,7 @@ export const Stage4TestScenarios: React.FC = () => {
                     required
                   />
                 </div>
-
+ 
                 <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Ожидаемые результаты (каждый с новой строки) *</label>
                   <textarea
@@ -387,7 +388,7 @@ export const Stage4TestScenarios: React.FC = () => {
                   />
                 </div>
               </div>
-
+ 
               {/* Requirement Coverage Checkboxes */}
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Покрытие требований</label>
@@ -435,7 +436,7 @@ export const Stage4TestScenarios: React.FC = () => {
                   ))}
                 </div>
               </div>
-
+ 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)} style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
                   Отмена
@@ -444,10 +445,11 @@ export const Stage4TestScenarios: React.FC = () => {
                   {editingScenario ? 'Сохранить' : 'Создать'}
                 </button>
               </div>
-
+ 
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>
